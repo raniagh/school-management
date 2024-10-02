@@ -17,7 +17,7 @@ export default function DashboardLayout({
           className='flex gap-2 items-center justify-center lg:justify-start'
         >
           <Image src='/logo.png' alt='logo' width={32} height={32} />
-          <span className='hidden lg:block'>School</span>
+          <span className='hidden lg:block font-bold'>School</span>
         </Link>
         <Menu />
       </div>
