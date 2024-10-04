@@ -1,5 +1,6 @@
 import Announcement from "@/components/Announcement";
 import BigCalendar from "@/components/BigCalendar";
+import FormModal from "@/components/FormModal";
 import Performance from "@/components/Performance";
 import SingleTeacherCard from "@/components/SingleTeacherCard";
 import { studentsData } from "@/lib/data";
@@ -8,8 +9,10 @@ import Link from "next/link";
 import React from "react";
 
 const SingleStudentPage = ({ params }: { params: { id: string } }) => {
-  const id = params.id;
-  const student = studentsData.find((student) => student.studentId === id);
+  const studentId = params.id;
+  const student = studentsData.find(
+    (student) => student.id.toString() === studentId
+  );
 
   return (
     <div className='flex-1 p-4 flex gap-4 flex-col xl:flex-row '>
@@ -30,7 +33,10 @@ const SingleStudentPage = ({ params }: { params: { id: string } }) => {
               />
             </div>
             <div className='w-2/3 flex flex-col justify-between gap-4'>
-              <h1 className='text-xl font-semibold'>{student?.name}</h1>
+              <div className='flex items-center gap-4'>
+                <h1 className='text-xl font-semibold'>{student?.name}</h1>
+                <FormModal table='student' type='update' data={student} />
+              </div>
               <p className='text-sm text-gray-500'>Lorem bla blab bla</p>
 
               <div className='flex items-center justify-between gap-2 flex-wrap text-xs font-medium'>
