@@ -109,14 +109,16 @@ const EventsListPage = async ({
   //ROLE CONDITIONS
   const roleConditions = {
     teacher: { lessons: { some: { teacherId: currentUserId } } },
-    student: { students: { some: { studentId: currentUserId } } },
+    student: { students: { some: { id: currentUserId } } },
     parent: { students: { some: { parentId: currentUserId } } },
   };
 
   //Return general events or specific ones by role
   query.OR = [
     { classId: null },
-    { class: roleConditions[role as keyof typeof roleConditions] || {} },
+    {
+      class: roleConditions[role as keyof typeof roleConditions] || {},
+    },
   ];
 
   const [events, count] = await prisma.$transaction([
