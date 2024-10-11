@@ -1,5 +1,6 @@
 import Announcement from "@/components/Announcement";
-import BigCalendar from "@/components/BigCalendar";
+import BigCalendarContainer from "@/components/BigCalendarContainer";
+import { currentUserId } from "@/lib/utils";
 import React from "react";
 
 const TeacherPage = () => {
@@ -9,7 +10,7 @@ const TeacherPage = () => {
       <div className='w-full  xl:w-2/3'>
         <div className='h-full bg-white p-4 rounded-md'>
           <h1 className='text-lg font-semibold'>Schedule</h1>
-          <BigCalendar />
+          <BigCalendarContainer type='teacher' id={currentUserId} />
         </div>
       </div>
       {/* RIGHT */}
