@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 /*dynamic is an utility used for code splitting and lazy loading.
 Instead of importing the component at build time, it allows you to load the componenet only when needed it
@@ -24,13 +24,27 @@ const SubjectForm = dynamic(() => import("./forms/SubjectForm"), {
 });
 
 const forms: {
-  [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
+  [key: string]: (
+    type: "create" | "update",
+    data?: any,
+    setOpen: Dispatch<SetStateAction<boolean>>
+  ) => JSX.Element;
 } = {
-  teacher: (type, data) => <TeacherForm type={type} data={data} />,
-  student: (type, data) => <StudentForm type={type} data={data} />,
-  class: (type, data) => <ClassForm type={type} data={data} />,
-  exam: (type, data) => <ExamForm type={type} data={data} />,
-  subject: (type, data) => <SubjectForm type={type} data={data} />,
+  teacher: (type, data, setOpen) => (
+    <TeacherForm type={type} data={data} setOpen={setOpen} />
+  ),
+  student: (type, data, setOpen) => (
+    <StudentForm type={type} data={data} setOpen={setOpen} />
+  ),
+  class: (type, data, setOpen) => (
+    <ClassForm type={type} data={data} setOpen={setOpen} />
+  ),
+  exam: (type, data, setOpen) => (
+    <ExamForm type={type} data={data} setOpen={setOpen} />
+  ),
+  subject: (type, data, setOpen) => (
+    <SubjectForm type={type} data={data} setOpen={setOpen} />
+  ),
 };
 
 const FormModal = ({
@@ -78,7 +92,7 @@ const FormModal = ({
         </button>
       </form>
     ) : type === "create" || type === "update" ? (
-      forms[table](type, data)
+      forms[table](type, data, setOpen)
     ) : (
       "Form not found!"
     );

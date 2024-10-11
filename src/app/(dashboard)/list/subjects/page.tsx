@@ -37,12 +37,10 @@ const renderRow = (item: SubjectList) => (
 
     <td>
       <div className='flex items-center gap-2'>
-        {role === "admin" && (
-          <>
-            <FormModal table='subject' type='update' data={item} />
-            <FormModal table='subject' type='delete' id={item.id} />
-          </>
-        )}
+        <>
+          <FormModal table='subject' type='update' data={item} />
+          <FormModal table='subject' type='delete' id={item.id} />
+        </>
       </div>
     </td>
   </tr>
@@ -96,7 +94,7 @@ const SubjectsListPage = async ({
             <button className='w-8 h-8 flex items-center justify-center rounded-full bg-yellow '>
               <Image src='/sort.png' alt='sort' height={14} width={14} />
             </button>
-            {role === "admin" && <FormModal table='subject' type='create' />}
+            <FormModal table='subject' type='create' />
           </div>
         </div>
       </div>
