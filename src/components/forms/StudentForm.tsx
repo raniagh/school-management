@@ -6,13 +6,22 @@ import { z } from "zod";
 import InputField from "../InputField";
 import Image from "next/image";
 import { studentSchema, StudentSchema } from "@/lib/formValidationSchemas";
+import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useEffect } from "react";
+import { toast } from "react-toastify";
+import { createStudent, updateStudent } from "@/lib/actions";
+import { useFormState } from "react-dom";
 
 const StudentForm = ({
   type,
   data,
+  setOpen,
+  relatedData,
 }: {
   type: "create" | "update";
   data?: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
 }) => {
   const {
     register,
@@ -22,7 +31,26 @@ const StudentForm = ({
     resolver: zodResolver(studentSchema),
   });
 
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const [state, formAction] = useFormState(
+    type === "create" ? createStudent : updateStudent,
+    {
+      success: false,
+      error: false,
+    }
+  );
+
+  const onSubmit = handleSubmit((data) => {
+    formAction(data);
+  });
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      toast(`Subject has been ${type === "create" ? "created" : "updated"}`);
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state]);
 
   return (
     <form className='flex flex-col gap-8' onSubmit={onSubmit}>

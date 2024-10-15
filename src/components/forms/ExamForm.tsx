@@ -4,13 +4,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
 import { examSchema, ExamSchema } from "@/lib/formValidationSchemas";
+import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useEffect } from "react";
+import { toast } from "react-toastify";
+import { useFormState } from "react-dom";
+import { createExam, updateExam } from "@/lib/actions";
 
 const ExamForm = ({
   type,
   data,
+  setOpen,
+  relatedData,
 }: {
   type: "create" | "update";
   data?: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
 }) => {
   const {
     register,
@@ -20,9 +29,28 @@ const ExamForm = ({
     resolver: zodResolver(examSchema),
   });
 
+  const [state, formAction] = useFormState(
+    type === "create" ? createExam : updateExam,
+    {
+      success: false,
+      error: false,
+    }
+  );
+
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
+    formAction(data);
   });
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      toast(`Subject has been ${type === "create" ? "created" : "updated"}`);
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state]);
+
+  const { lessons } = relatedData;
 
   return (
     <form className='flex flex-col gap-8' onSubmit={onSubmit}>
@@ -70,11 +98,11 @@ const ExamForm = ({
             {...register("lessonId")}
             defaultValue={data?.teachers}
           >
-            {/*  {lessons.map((lesson: { id: number; name: string }) => (
+            {lessons.map((lesson: { id: number; name: string }) => (
               <option value={lesson.id} key={lesson.id}>
                 {lesson.name}
               </option>
-            ))} */}
+            ))}
           </select>
           {errors.lessonId?.message && (
             <p className='text-xs text-red-400'>
@@ -83,9 +111,9 @@ const ExamForm = ({
           )}
         </div>
       </div>
-      {/* {state.error && (
+      {state.error && (
         <span className='text-red-500'>Something went wrong!</span>
-      )} */}
+      )}
       <button className='bg-blue-400 text-white p-2 rounded-md'>
         {type === "create" ? "Create" : "Update"}
       </button>

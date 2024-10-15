@@ -4,13 +4,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
 import { classSchema, ClassSchema } from "@/lib/formValidationSchemas";
+import { Dispatch, SetStateAction, useEffect } from "react";
+import { useFormState } from "react-dom";
+import { useRouter } from "next/navigation";
+import { createClass, updateClass } from "@/lib/actions";
+import { toast } from "react-toastify";
 
 const ClassForm = ({
   type,
   data,
+  setOpen,
+  relatedData,
 }: {
   type: "create" | "update";
   data?: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
 }) => {
   const {
     register,
@@ -20,9 +29,29 @@ const ClassForm = ({
     resolver: zodResolver(classSchema),
   });
 
+  //createSubject is the formAction and state we put whatever we want
+  const [state, formAction] = useFormState(
+    type === "create" ? createClass : updateClass,
+    {
+      success: false,
+      error: false,
+    }
+  );
+
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
+    formAction(data);
   });
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      toast(`Class has been ${type === "create" ? "created" : "updated"}`);
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state]);
+
+  const { teachers, grades } = relatedData;
 
   return (
     <form className='flex flex-col gap-8' onSubmit={onSubmit}>
@@ -61,7 +90,7 @@ const ClassForm = ({
             {...register("supervisorId")}
             defaultValue={data?.teachers}
           >
-            {/* {teachers?.map(
+            {teachers?.map(
               (teacher: { id: string; name: string; surname: string }) => (
                 <option
                   value={teacher.id}
@@ -71,7 +100,7 @@ const ClassForm = ({
                   {teacher.name + " " + teacher.surname}
                 </option>
               )
-            )} */}
+            )}
           </select>
           {errors.supervisorId?.message && (
             <p className='text-xs text-red-400'>
@@ -86,7 +115,7 @@ const ClassForm = ({
             {...register("gradeId")}
             defaultValue={data?.gradeId}
           >
-            {/* {grades.map((grade: { id: number; level: number }) => (
+            {grades.map((grade: { id: number; level: number }) => (
               <option
                 value={grade.id}
                 key={grade.id}
@@ -94,7 +123,7 @@ const ClassForm = ({
               >
                 {grade.level}
               </option>
-            ))} */}
+            ))}
           </select>
           {errors.gradeId?.message && (
             <p className='text-xs text-red-400'>
@@ -103,9 +132,9 @@ const ClassForm = ({
           )}
         </div>
       </div>
-      {/*  {state.error && (
+      {state.error && (
         <span className='text-red-500'>Something went wrong!</span>
-      )} */}
+      )}
       <button className='bg-blue-400 text-white p-2 rounded-md'>
         {type === "create" ? "Create" : "Update"}
       </button>

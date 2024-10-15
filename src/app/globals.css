@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import '~react-toastify/ReactToastify.min.css';
 
 .react-calendar {
   width: 100% !important;

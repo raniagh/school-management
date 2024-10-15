@@ -6,13 +6,22 @@ import { z } from "zod";
 import InputField from "../InputField";
 import Image from "next/image";
 import { TeacherSchema, teacherSchema } from "@/lib/formValidationSchemas";
+import { Dispatch, SetStateAction, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { useFormState } from "react-dom";
+import { createTeacher, updateTeacher } from "@/lib/actions";
 
 const TeacherForm = ({
   type,
   data,
+  setOpen,
+  relatedData,
 }: {
   type: "create" | "update";
   data?: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
 }) => {
   const {
     register,
@@ -22,7 +31,28 @@ const TeacherForm = ({
     resolver: zodResolver(teacherSchema),
   });
 
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const [state, formAction] = useFormState(
+    type === "create" ? createTeacher : updateTeacher,
+    {
+      success: false,
+      error: false,
+    }
+  );
+
+  const onSubmit = handleSubmit((data) => {
+    formAction(data);
+  });
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      toast(`Teacher has been ${type === "create" ? "created" : "updated"}`);
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state]);
+
+  const { subjects } = relatedData;
 
   return (
     <form className='flex flex-col gap-8' onSubmit={onSubmit}>
@@ -102,6 +132,27 @@ const TeacherForm = ({
           error={errors.birthday}
           type='date'
         />
+
+        <div className='flex flex-col gap-2 w-full md:w-1/4'>
+          <label className='text-xs text-gray-500'>Subjects</label>
+          <select
+            multiple
+            className='ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full'
+            {...register("subjects")}
+            defaultValue={data?.subjects}
+          >
+            {subjects.map((subject: { id: number; name: string }) => (
+              <option value={subject.id} key={subject.id}>
+                {subject.name}
+              </option>
+            ))}
+          </select>
+          {errors.subjects?.message && (
+            <p className='text-xs text-red-400'>
+              {errors.subjects.message.toString()}
+            </p>
+          )}
+        </div>
 
         <div className='flex flex-col gap-2 w-full md:w-1/4'>
           <label className='text-xs text-gray-500'>Sex</label>

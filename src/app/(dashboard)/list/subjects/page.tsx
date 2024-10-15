@@ -1,10 +1,9 @@
-import FormModal from "@/components/FormModal";
+import FormContainer from "@/components/FormContainer";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { role } from "@/lib/utils";
 import { Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import React from "react";
@@ -38,8 +37,8 @@ const renderRow = (item: SubjectList) => (
     <td>
       <div className='flex items-center gap-2'>
         <>
-          <FormModal table='subject' type='update' data={item} />
-          <FormModal table='subject' type='delete' id={item.id} />
+          <FormContainer table='subject' type='update' data={item} />
+          <FormContainer table='subject' type='delete' id={item.id} />
         </>
       </div>
     </td>
@@ -94,7 +93,7 @@ const SubjectsListPage = async ({
             <button className='w-8 h-8 flex items-center justify-center rounded-full bg-yellow '>
               <Image src='/sort.png' alt='sort' height={14} width={14} />
             </button>
-            <FormModal table='subject' type='create' />
+            <FormContainer table='subject' type='create' />
           </div>
         </div>
       </div>
