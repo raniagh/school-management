@@ -225,7 +225,7 @@ export const deleteTeacher = async (
   try {
     await prisma.teacher.delete({
       where: {
-        id: parseInt(id),
+        id: id,
       },
     });
     return { success: true, error: false };
