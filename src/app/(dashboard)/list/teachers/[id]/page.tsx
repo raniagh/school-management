@@ -1,18 +1,41 @@
 import Announcement from "@/components/Announcement";
 import BigCalendar from "@/components/BigCalendar";
-import FormModal from "@/components/FormModal";
+import FormContainer from "@/components/FormContainer";
 import Performance from "@/components/Performance";
 import SingleTeacherCard from "@/components/SingleTeacherCard";
-import { teachersData } from "@/lib/data";
+import prisma from "@/lib/prisma";
+import { role } from "@/lib/utils";
+import { Teacher } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import React from "react";
 
-const SingleTeacherPage = ({ params }: { params: { id: string } }) => {
-  const TeacherId = params.id;
-  const teacher = teachersData.find(
-    (teacher) => teacher.id.toString() === TeacherId
-  );
+const SingleTeacherPage = async ({
+  params: { id },
+}: {
+  params: { id: string };
+}) => {
+  const teacher:
+    | (Teacher & {
+        _count: { subjects: number; lessons: number; classes: number };
+      })
+    | null = await prisma.teacher.findUnique({
+    where: { id },
+    include: {
+      _count: {
+        select: {
+          subjects: true,
+          lessons: true,
+          classes: true,
+        },
+      },
+    },
+  });
+
+  if (!teacher) {
+    return notFound();
+  }
 
   return (
     <div className='flex-1 p-4 flex gap-4 flex-col xl:flex-row '>
@@ -24,7 +47,7 @@ const SingleTeacherPage = ({ params }: { params: { id: string } }) => {
           <div className='flex-1 flex gap-4 bg-sky py-6 px-4 rounded-md'>
             <div className='w-1/3 '>
               <Image
-                src={teacher?.photo}
+                src={teacher.img || "/noAvatar.png"}
                 alt=''
                 width={144}
                 height={144}
@@ -33,27 +56,33 @@ const SingleTeacherPage = ({ params }: { params: { id: string } }) => {
             </div>
             <div className='w-2/3 flex flex-col justify-between gap-4'>
               <div className='flex items-center gap-4'>
-                <h1 className='text-xl font-semibold'>{teacher?.name}</h1>
-                <FormModal table='teacher' type='update' data={teacher} />
+                <h1 className='text-xl font-semibold'>
+                  {teacher.name + " " + teacher.surname}
+                </h1>
+                {role === "admin" && (
+                  <FormContainer table='teacher' type='update' data={teacher} />
+                )}
               </div>
               <p className='text-sm text-gray-500'>Lorem bla blab bla</p>
 
               <div className='flex items-center justify-between gap-2 flex-wrap text-xs font-medium'>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/blood.png' alt='blood' width={14} height={14} />
-                  <h3>A+</h3>
+                  <h3>{teacher.bloodType}</h3>
                 </div>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/date.png' alt='date' width={14} height={14} />
-                  <h3>January 2025</h3>
+                  <h3>
+                    {new Intl.DateTimeFormat("en-US").format(teacher.birthday)}
+                  </h3>
                 </div>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/mail.png' alt='' width={14} height={14} />
-                  <h3>{teacher?.email}</h3>
+                  <h3>{teacher.email || "-"}</h3>
                 </div>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/phone.png' alt='' width={14} height={14} />
-                  <h3>{teacher?.phone}</h3>
+                  <h3>{teacher.phone || "-"}</h3>
                 </div>
               </div>
             </div>
@@ -67,17 +96,17 @@ const SingleTeacherPage = ({ params }: { params: { id: string } }) => {
             />
             <SingleTeacherCard
               imageSrc='/singleBranch.png'
-              cardCount='2'
+              cardCount={teacher._count.subjects}
               cardName='Branches'
             />
             <SingleTeacherCard
               imageSrc='/singleLesson.png'
-              cardCount='6'
+              cardCount={teacher._count.lessons}
               cardName='Lessons'
             />
             <SingleTeacherCard
               imageSrc='/singleClass.png'
-              cardCount='6'
+              cardCount={teacher._count.classes}
               cardName='Classes'
             />
           </div>
