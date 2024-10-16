@@ -1,18 +1,41 @@
 import Announcement from "@/components/Announcement";
-import BigCalendar from "@/components/BigCalendar";
+import BigCalendarContainer from "@/components/BigCalendarContainer";
 import FormModal from "@/components/FormModal";
 import Performance from "@/components/Performance";
 import SingleTeacherCard from "@/components/SingleTeacherCard";
-import { studentsData } from "@/lib/data";
+import StudentAttendanceCrad from "@/components/StudentAttendanceCrad";
+import prisma from "@/lib/prisma";
+import { Class, Student } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { notFound } from "next/navigation";
+import React, { Suspense } from "react";
 
-const SingleStudentPage = ({ params }: { params: { id: string } }) => {
-  const studentId = params.id;
-  const student = studentsData.find(
-    (student) => student.id.toString() === studentId
-  );
+const SingleStudentPage = async ({
+  params: { id },
+}: {
+  params: { id: string };
+}) => {
+  const student:
+    | (Student & { class: Class & { _count: { lessons: number } } })
+    | null = await prisma.student.findUnique({
+    where: { id },
+    include: {
+      class: {
+        include: {
+          _count: {
+            select: {
+              lessons: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!student) {
+    return notFound();
+  }
 
   return (
     <div className='flex-1 p-4 flex gap-4 flex-col xl:flex-row '>
@@ -25,7 +48,7 @@ const SingleStudentPage = ({ params }: { params: { id: string } }) => {
           <div className='flex-1 flex gap-4 bg-sky py-6 px-4 rounded-md'>
             <div className='w-1/3 '>
               <Image
-                src={student?.photo}
+                src={student.img || "/noAvatar.png"}
                 alt=''
                 width={144}
                 height={144}
@@ -34,7 +57,9 @@ const SingleStudentPage = ({ params }: { params: { id: string } }) => {
             </div>
             <div className='w-2/3 flex flex-col justify-between gap-4'>
               <div className='flex items-center gap-4'>
-                <h1 className='text-xl font-semibold'>{student?.name}</h1>
+                <h1 className='text-xl font-semibold'>
+                  {student.name + " " + student.surname}
+                </h1>
                 <FormModal table='student' type='update' data={student} />
               </div>
               <p className='text-sm text-gray-500'>Lorem bla blab bla</p>
@@ -42,43 +67,41 @@ const SingleStudentPage = ({ params }: { params: { id: string } }) => {
               <div className='flex items-center justify-between gap-2 flex-wrap text-xs font-medium'>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/blood.png' alt='blood' width={14} height={14} />
-                  <h3>A+</h3>
+                  <h3>{student.bloodType}</h3>
                 </div>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/date.png' alt='date' width={14} height={14} />
-                  <h3>January 2025</h3>
+                  <h3>{new Intl.DateTimeFormat("en-US").format(new Date())}</h3>
                 </div>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/mail.png' alt='' width={14} height={14} />
-                  <h3>{student?.email}</h3>
+                  <h3>{student.email || "-"}</h3>
                 </div>
                 <div className='w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2 '>
                   <Image src='/phone.png' alt='' width={14} height={14} />
-                  <h3>{student?.phone}</h3>
+                  <h3>{student.phone || "-"}</h3>
                 </div>
               </div>
             </div>
           </div>
           {/* SMALL CARDS */}
           <div className='flex-1 flex gap-4 justify-between flex-wrap '>
-            <SingleTeacherCard
-              imageSrc='/singleAttendance.png'
-              cardCount='90%'
-              cardName='Attendance'
-            />
+            <Suspense fallback='loading...'>
+              <StudentAttendanceCrad id={student.id} />
+            </Suspense>
             <SingleTeacherCard
               imageSrc='/singleBranch.png'
-              cardCount='6th'
+              cardCount={`${student.class.name.charAt(0)}th`}
               cardName='Grade'
             />
             <SingleTeacherCard
               imageSrc='/singleLesson.png'
-              cardCount='18'
+              cardCount={student.class._count.lessons}
               cardName='Lessons'
             />
             <SingleTeacherCard
               imageSrc='/singleClass.png'
-              cardCount='6A'
+              cardCount={student.class.name}
               cardName='Class'
             />
           </div>
@@ -86,7 +109,7 @@ const SingleStudentPage = ({ params }: { params: { id: string } }) => {
         {/* Schedule*/}
         <div className='mt-4 bg-white rounded-md p-4 h-[800px]'>
           <h1>Student&apos;s Schedule</h1>
-          <BigCalendar />
+          <BigCalendarContainer type='class' id={student.class.id} />
         </div>
       </div>
 

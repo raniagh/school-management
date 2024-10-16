@@ -174,8 +174,8 @@ const TeacherForm = ({
             {...register("sex")}
             defaultValue={data?.sex}
           >
-            <option value='male'>Male</option>
-            <option value='female'>Female</option>
+            <option value='MALE'>Male</option>
+            <option value='FEMALE'>Female</option>
           </select>
           {errors.sex?.message && (
             <p className='text-xs text-red-400'>

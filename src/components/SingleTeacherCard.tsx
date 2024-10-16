@@ -7,7 +7,7 @@ const SingleTeacherCard = ({
   cardName,
 }: {
   imageSrc: string;
-  cardCount: number;
+  cardCount: number | string;
   cardName: string;
 }) => {
   return (

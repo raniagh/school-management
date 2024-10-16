@@ -3,12 +3,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
-import { classSchema, ClassSchema } from "@/lib/formValidationSchemas";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import {
+  classSchema,
+  ClassSchema,
+  subjectSchema,
+  SubjectSchema,
+} from "@/lib/formValidationSchemas";
+import {
+  createClass,
+  createSubject,
+  updateClass,
+  updateSubject,
+} from "@/lib/actions";
 import { useFormState } from "react-dom";
-import { useRouter } from "next/navigation";
-import { createClass, updateClass } from "@/lib/actions";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const ClassForm = ({
   type,
@@ -29,7 +39,8 @@ const ClassForm = ({
     resolver: zodResolver(classSchema),
   });
 
-  //createSubject is the formAction and state we put whatever we want
+  // AFTER REACT 19 IT'LL BE USEACTIONSTATE
+
   const [state, formAction] = useFormState(
     type === "create" ? createClass : updateClass,
     {
@@ -39,17 +50,19 @@ const ClassForm = ({
   );
 
   const onSubmit = handleSubmit((data) => {
+    console.log(data);
     formAction(data);
   });
+
   const router = useRouter();
 
   useEffect(() => {
     if (state.success) {
-      toast(`Class has been ${type === "create" ? "created" : "updated"}`);
+      toast(`Subject has been ${type === "create" ? "created" : "updated"}!`);
       setOpen(false);
       router.refresh();
     }
-  }, [state]);
+  }, [state, router, type, setOpen]);
 
   const { teachers, grades } = relatedData;
 
@@ -81,6 +94,7 @@ const ClassForm = ({
             defaultValue={data?.id}
             register={register}
             error={errors?.id}
+            hidden
           />
         )}
         <div className='flex flex-col gap-2 w-full md:w-1/4'>
@@ -90,7 +104,7 @@ const ClassForm = ({
             {...register("supervisorId")}
             defaultValue={data?.teachers}
           >
-            {teachers?.map(
+            {teachers.map(
               (teacher: { id: string; name: string; surname: string }) => (
                 <option
                   value={teacher.id}

@@ -1,21 +1,27 @@
 import Announcement from "@/components/Announcement";
-import BigCalendar from "@/components/BigCalendar";
+import BigCalendarContainer from "@/components/BigCalendarContainer";
 import FormContainer from "@/components/FormContainer";
 import Performance from "@/components/Performance";
 import SingleTeacherCard from "@/components/SingleTeacherCard";
 import prisma from "@/lib/prisma";
-import { role } from "@/lib/utils";
+import { getAuth } from "@clerk/nextjs/server";
 import { Teacher } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import React from "react";
+import { NextRequest } from "next/server";
+import { any } from "zod";
 
 const SingleTeacherPage = async ({
   params: { id },
+  req,
 }: {
   params: { id: string };
+  req: any;
 }) => {
+  const { sessionClaims } = getAuth(req);
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+
   const teacher:
     | (Teacher & {
         _count: { subjects: number; lessons: number; classes: number };
@@ -114,7 +120,7 @@ const SingleTeacherPage = async ({
         {/* Schedule*/}
         <div className='mt-4 bg-white rounded-md p-4 h-[800px]'>
           <h1>Teacher&apos;s Schedule</h1>
-          <BigCalendar />
+          <BigCalendarContainer type='teacher' id={teacher.id} />
         </div>
       </div>
 
