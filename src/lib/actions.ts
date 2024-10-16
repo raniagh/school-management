@@ -223,6 +223,7 @@ export const deleteTeacher = async (
 ) => {
   const id = data.get("id") as string;
   try {
+    await clerkClient.users.deleteUser(id);
     await prisma.teacher.delete({
       where: {
         id: id,
@@ -294,10 +295,41 @@ export const createStudent = async (
   data: StudentSchema,
   currentState: CurrentState
 ) => {
+  //Check the capacity of class
+  const classItem = await prisma.class.findUnique({
+    where: { id: data.classId },
+    include: { _count: { select: { students: true } } },
+  });
+
+  //If there is no space
+  if (classItem && classItem.capacity === classItem._count.students) {
+    return { success: false, error: true };
+  }
+
   try {
+    const user = await clerkClient.users.createUser({
+      username: data.username,
+      password: data.password,
+      firstName: data.name,
+      lastName: data.surname,
+      publicMetadata: { role: "student" },
+    });
     await prisma.student.create({
       data: {
+        id: user.id,
+        username: data.username,
         name: data.name,
+        surname: data.surname,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        img: data.img,
+        bloodType: data.bloodType,
+        sex: data.sex,
+        birthday: data.birthday,
+        gradeId: data.gradeId,
+        classId: data.classId,
+        parentId: data.parentId,
       },
     });
     return { success: true, error: false };
@@ -311,15 +343,40 @@ export const updateStudent = async (
   data: StudentSchema,
   currentState: CurrentState
 ) => {
+  if (!data.id) {
+    return { success: false, error: true };
+  }
   try {
+    const user = await clerkClient.users.updateUser(data.id, {
+      username: data.username,
+      ...(data.password !== "" && { password: data.password }),
+      firstName: data.name,
+      lastName: data.surname,
+      publicMetadata: { role: "teacher" },
+    });
+
     await prisma.student.update({
       where: {
         id: data.id,
       },
       data: {
+        ...(data.password !== "" && { password: data.password }),
+        username: data.username,
         name: data.name,
+        surname: data.surname,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        img: data.img,
+        bloodType: data.bloodType,
+        sex: data.sex,
+        birthday: data.birthday,
+        gradeId: data.gradeId,
+        classId: data.classId,
+        parentId: data.parentId,
       },
     });
+
     return { success: true, error: false };
   } catch (error) {
     console.log(error);
@@ -333,9 +390,10 @@ export const deleteStudent = async (
 ) => {
   const id = data.get("id") as string;
   try {
+    await clerkClient.users.deleteUser(id);
     await prisma.student.delete({
       where: {
-        id: parseInt(id),
+        id: id,
       },
     });
     return { success: true, error: false };

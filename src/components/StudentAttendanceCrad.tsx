@@ -17,7 +17,7 @@ const StudentAttendanceCrad = async ({ id }: { id: string }) => {
   return (
     <SingleTeacherCard
       imageSrc='/singleAttendance.png'
-      cardCount={`${percentage}%`}
+      cardCount={`${percentage}%` || "-"}
       cardName='Attendance'
     />
   );

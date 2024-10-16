@@ -6,11 +6,12 @@ import { z } from "zod";
 import InputField from "../InputField";
 import Image from "next/image";
 import { studentSchema, StudentSchema } from "@/lib/formValidationSchemas";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect } from "react";
 import { toast } from "react-toastify";
-import { createStudent, updateStudent } from "@/lib/actions";
 import { useFormState } from "react-dom";
+import { CldUploadWidget } from "next-cloudinary";
+import { createStudent, updateStudent } from "@/lib/actions";
 
 const StudentForm = ({
   type,
@@ -31,6 +32,8 @@ const StudentForm = ({
     resolver: zodResolver(studentSchema),
   });
 
+  const [img, setImg] = useState<any>();
+
   const [state, formAction] = useFormState(
     type === "create" ? createStudent : updateStudent,
     {
@@ -40,22 +43,24 @@ const StudentForm = ({
   );
 
   const onSubmit = handleSubmit((data) => {
-    formAction(data);
+    formAction({ ...data, img: img?.secure_url });
   });
   const router = useRouter();
 
   useEffect(() => {
     if (state.success) {
-      toast(`Subject has been ${type === "create" ? "created" : "updated"}`);
+      toast(`Student has been ${type === "create" ? "created" : "updated"}`);
       setOpen(false);
       router.refresh();
     }
   }, [state]);
 
+  const { grades, classes } = relatedData;
+
   return (
     <form className='flex flex-col gap-8' onSubmit={onSubmit}>
       <h1 className='text-xl font-semibold'>
-        {type === "create" ? "Create a new student" : "Update the student"}
+        {type === "create" ? "Create a new Student" : "Update the Student"}
       </h1>
       <span className='text-xs text-gray-400 font-medium'>
         Authentication Information
@@ -87,6 +92,25 @@ const StudentForm = ({
         Personal Information
       </span>
       <div className='flex justify-between flex-wrap gap-4'>
+        <CldUploadWidget
+          uploadPreset='school'
+          onSuccess={(result, widget) => {
+            setImg(result.info);
+            widget.close();
+          }}
+        >
+          {({ open }) => {
+            return (
+              <div
+                className='text-xs text-gray-500 flex items-center gap-2 cursor-pointer'
+                onClick={() => open()}
+              >
+                <Image src='/upload.png' alt='' width={28} height={28} />
+                <span>Upload a photo</span>
+              </div>
+            );
+          }}
+        </CldUploadWidget>
         <InputField
           label='First Name'
           name='name'
@@ -125,12 +149,28 @@ const StudentForm = ({
         <InputField
           label='Birthday'
           name='birthday'
-          defaultValue={data?.birthday}
+          defaultValue={data?.birthday.toISOString().split("T")[0]}
           register={register}
           error={errors.birthday}
           type='date'
         />
-
+        <InputField
+          label='Parent Id'
+          name='parentId'
+          defaultValue={data?.parentId}
+          register={register}
+          error={errors.parentId}
+        />
+        {data && (
+          <InputField
+            label='Id'
+            name='id'
+            defaultValue={data?.id}
+            register={register}
+            error={errors?.id}
+            hidden
+          />
+        )}
         <div className='flex flex-col gap-2 w-full md:w-1/4'>
           <label className='text-xs text-gray-500'>Sex</label>
           <select
@@ -138,8 +178,8 @@ const StudentForm = ({
             {...register("sex")}
             defaultValue={data?.sex}
           >
-            <option value='male'>Male</option>
-            <option value='female'>Female</option>
+            <option value='MALE'>Male</option>
+            <option value='FEMALE'>Female</option>
           </select>
           {errors.sex?.message && (
             <p className='text-xs text-red-400'>
@@ -148,18 +188,53 @@ const StudentForm = ({
           )}
         </div>
 
-        <div className='flex flex-col gap-2 w-full md:w-1/4 justify-center'>
-          <label
-            className='text-xs text-gray-500 flex items-center gap-2 cursor-pointer'
-            htmlFor='img'
+        <div className='flex flex-col gap-2 w-full md:w-1/4'>
+          <label className='text-xs text-gray-500'>Grades</label>
+          <select
+            multiple
+            className='ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full'
+            {...register("gradeId")}
+            defaultValue={data?.gradeId}
           >
-            <Image src='/upload.png' alt='' width={28} height={28} />
-            <span>Upload a photo</span>
-          </label>
-          <input type='file' id='img' {...register("img")} className='hidden' />
-          {errors.img?.message && (
+            {grades.map((grade: { id: number; level: string }) => (
+              <option value={grade.id} key={grade.id}>
+                {grade.level}
+              </option>
+            ))}
+          </select>
+          {errors.gradeId?.message && (
             <p className='text-xs text-red-400'>
-              {errors.img.message.toString()}
+              {errors.gradeId.message.toString()}
+            </p>
+          )}
+        </div>
+
+        <div className='flex flex-col gap-2 w-full md:w-1/4'>
+          <label className='text-xs text-gray-500'>Class</label>
+          <select
+            multiple
+            className='ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full'
+            {...register("classId")}
+            defaultValue={data?.classId}
+          >
+            {classes.map(
+              (classItem: {
+                id: number;
+                name: string;
+                capacity: number;
+                _count: { students: number };
+              }) => (
+                <option value={classItem.id} key={classItem.id}>
+                  {classItem.name} -
+                  {classItem._count.students + "/" + classItem.capacity}{" "}
+                  capacity
+                </option>
+              )
+            )}
+          </select>
+          {errors.classId?.message && (
+            <p className='text-xs text-red-400'>
+              {errors.classId.message.toString()}
             </p>
           )}
         </div>

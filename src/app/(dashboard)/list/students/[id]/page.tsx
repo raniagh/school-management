@@ -5,6 +5,7 @@ import Performance from "@/components/Performance";
 import SingleTeacherCard from "@/components/SingleTeacherCard";
 import StudentAttendanceCrad from "@/components/StudentAttendanceCrad";
 import prisma from "@/lib/prisma";
+import { role } from "@/lib/utils";
 import { Class, Student } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
@@ -60,7 +61,9 @@ const SingleStudentPage = async ({
                 <h1 className='text-xl font-semibold'>
                   {student.name + " " + student.surname}
                 </h1>
-                <FormModal table='student' type='update' data={student} />
+                {role === "admin" && (
+                  <FormModal table='student' type='update' data={student} />
+                )}
               </div>
               <p className='text-sm text-gray-500'>Lorem bla blab bla</p>
 
