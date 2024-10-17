@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import InputField from "../InputField";
 import { examSchema, ExamSchema } from "@/lib/formValidationSchemas";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useFormState } from "react-dom";
 import { createExam, updateExam } from "@/lib/actions";
@@ -29,26 +29,36 @@ const ExamForm = ({
     resolver: zodResolver(examSchema),
   });
 
-  const [state, formAction] = useFormState(
-    type === "create" ? createExam : updateExam,
-    {
-      success: false,
-      error: false,
-    }
-  );
-
-  const onSubmit = handleSubmit((data) => {
-    formAction(data);
+  const [state, setState] = useState({
+    success: false,
+    error: false,
   });
+
+  const onSubmit = handleSubmit(async (formData) => {
+    try {
+      if (type === "create") {
+        await createExam(formData);
+      } else {
+        await updateExam(formData);
+      }
+      // Set success state
+      setState({ success: true, error: false });
+    } catch (err) {
+      // Handle error case
+      setState({ success: false, error: true });
+    }
+  });
+
   const router = useRouter();
 
+  // Side effect to show toast and refresh when state.success is true
   useEffect(() => {
     if (state.success) {
       toast(`Exam has been ${type === "create" ? "created" : "updated"}`);
       setOpen(false);
       router.refresh();
     }
-  }, [state]);
+  }, [state.success, setOpen, router, type]);
 
   const { lessons } = relatedData;
 

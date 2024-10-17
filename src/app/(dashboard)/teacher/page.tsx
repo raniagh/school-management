@@ -1,16 +1,16 @@
 import Announcement from "@/components/Announcement";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
-import { currentUserId } from "@/lib/utils";
-import React from "react";
+import { auth } from "@clerk/nextjs/server";
 
 const TeacherPage = () => {
+  const { userId } = auth();
   return (
     <div className='flex-1 p-4 flex gap-4 flex-col xl:flex-row '>
       {/* LEFT */}
       <div className='w-full  xl:w-2/3'>
         <div className='h-full bg-white p-4 rounded-md'>
           <h1 className='text-lg font-semibold'>Schedule</h1>
-          <BigCalendarContainer type='teacher' id={currentUserId} />
+          <BigCalendarContainer type='teacher' id={userId!} />
         </div>
       </div>
       {/* RIGHT */}

@@ -9,17 +9,15 @@ import { Teacher } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { NextRequest } from "next/server";
-import { any } from "zod";
 
 const SingleTeacherPage = async ({
   params: { id },
-  req,
+  context,
 }: {
   params: { id: string };
-  req: any;
+  context: any;
 }) => {
-  const { sessionClaims } = getAuth(req);
+  const { sessionClaims } = await getAuth(context.req);
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
   const teacher:
