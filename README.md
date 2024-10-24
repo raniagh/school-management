@@ -20,7 +20,6 @@ The app includes dashboards, charts, forms, search functionalities, and more. Th
 - **Forms and Validation**: **react-Hook-Form** for forms and **Zod** for schema validation.
 - **Image Upload:** integrated **Cloudinary** widget for uploading and managing images.
 - **Middleware**: Next.js middleware used to protect routes based on user roles.
-- 
 
 ## Live Demo
 ![img2](https://github.com/user-attachments/assets/3c3a43e2-6ad8-4289-b1ff-482eaa9ba523) 
