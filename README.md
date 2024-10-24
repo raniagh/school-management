@@ -26,6 +26,11 @@ The app includes dashboards, charts, forms, search functionalities, and more. Th
 ![img2](https://github.com/user-attachments/assets/3c3a43e2-6ad8-4289-b1ff-482eaa9ba523) 
 
 
+
+![img10](https://github.com/user-attachments/assets/38144652-ed37-44f3-8383-de0b6e5fecec)
+
+
+
 ![img3](https://github.com/user-attachments/assets/d88c4757-d441-414d-a386-cfaf0ce9b756)
 
 
