@@ -47,9 +47,9 @@ The app includes dashboards, charts, forms, search functionalities, and more. Th
 1. Clone this repository
 2. Install dependencies:
    ```
-   npm run dev
+   npm install
    # or
-   yarn dev
+   yarn install
    ```
 3. Install Docker and set up the PostgreSQL container:
    ```
