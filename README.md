@@ -51,24 +51,40 @@ The app includes dashboards, charts, forms, search functionalities, and more. Th
    # or
    yarn dev
    ```
-3. Set up environment variables:
+3. Install Docker and set up the PostgreSQL container:
+   ```
+   docker-compose up -d
+   ```
+4. Set up Prisma
+   ```
+   npx prisma migrate dev
+   ```
+5. Set up Clerk:
+   <ul>
+     <li>Register on <a href="https://clerk.com">Clerk.dev</a> and create an application.</li>
+     <li>Obtain your Clerk API keys and configure them in the environment variables.</li>
+   </ul
+6. Set up Cloudinary:
+   <ul>
+     <li>Register on <a href="https://cloudinary.com">Cloudinary</a> and get your API keys.</li>
+     <li>Add these keys to the .env file.</li>
+   </ul>
+7. Set up environment variables:
    Create a `.env` file in the root of the project and add the following environment variables:
-```
-
-DATABASE_URL=postgre-database-url
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=clerk-publishable-key
-CLERK_SECRET_KEY=clerk-secret-key
-NEXT_PUBLIC_CLERK_SIGN_IN_URL = /
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=cloudinary-cloud-name
-NEXT_PUBLIC_CLOUDINARY_API_KEY=cloudinary-api-key
-
-```
-4. Run the development server:
+   ```
+   DATABASE_URL=postgre-database-url
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=clerk-publishable-key
+   CLERK_SECRET_KEY=clerk-secret-key
+   NEXT_PUBLIC_CLERK_SIGN_IN_URL = /
+   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=cloudinary-cloud-name
+   NEXT_PUBLIC_CLOUDINARY_API_KEY=cloudinary-api-key
+   ```
+8. Run the development server:
   ```
-   npm run dev
+  npm run dev
    # or
    yarn dev
-   ```
+  ```
 Open http://localhost:3000 to view the application.
 
 ## Technologies Used
